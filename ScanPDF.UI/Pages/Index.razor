@@ -1,14 +1,43 @@
 ﻿@page "/"
+@using ScanPDF.Logic
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Scan-DPF</PageTitle>
 
+<MudText Typo="@Typo.h5" Style="text-align: center" Class="mb-2">Scan your PDF</MudText>
 
-<MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">Full Width Button</MudButton>
+<MudFileUpload T="IBrowserFile" Accept=".pdf" FilesChanged="@(x => OnClickScan(x))" MaximumFileCount="1">
+    <ButtonTemplate>
+        <MudButton HtmlTag="label"
+                   FullWidth="@true"
+                   Variant="@Variant.Filled"
+                   Color="@Color.Primary"
+                   StartIcon="@Icons.Material.Filled.CloudUpload"
+                   for="@context.Id">
+            Select PDF
+        </MudButton>
+    </ButtonTemplate>
+</MudFileUpload>
 
+@if (!string.IsNullOrEmpty(scanedText))
+{
+    <MudGrid>
+        <MudItem md="12">
+            <MudTextField @bind-Value="@scanedText" Lines="10" />
+        </MudItem>
+    </MudGrid>
+}
 
 @code
 {
+    private string scanedText;
 
+    private async Task OnClickScan(IBrowserFile browserFile)
+    {
+        Stream file = browserFile.OpenReadStream();
 
+        var scanner = new ScanText();
+        scanedText = await scanner.Scan(file);
 
+        StateHasChanged();
+    }
 }
